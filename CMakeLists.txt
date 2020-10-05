@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(agave_tests
       ${CMAKE_SOURCE_DIR}/tests/main.cpp
-      ${CMAKE_SOURCE_DIR}/tests/box.cpp
       ${CMAKE_SOURCE_DIR}/tests/defer1.cpp
       )
 target_include_directories(agave_tests PRIVATE ${CMAKE_SOURCE_DIR}/includes)

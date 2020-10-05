@@ -2,51 +2,130 @@
 
 #include <deque>
 #include <memory>
+#include <cassert>
+#include <utility>
 
 namespace agave {
 
-  // detail
+  // ------------------------------------------------------------------------
   namespace detail {
 
-    class AbstrDefrdObj {
+    class AbstrDfrObj {
     public:
-      virtual ~AbstrDefrdObj(){};
+      virtual ~AbstrDfrObj(){};
       bool ready_for_collection = false;
     };
 
-    thread_local std::deque<std::unique_ptr<detail::AbstrDefrdObj>>
+    template<typename T> class UniqueDfrObj : public AbstrDfrObj {
+    public:
+      T obj;
+
+      UniqueDfrObj(T&& _obj)
+        : obj(std::move(_obj)) {}
+    };
+
+    template<typename T> class CountedDfrObj : public AbstrDfrObj {
+    public:
+      T obj;
+      size_t counter;
+
+      CountedDfrObj(T&& _obj)
+        : obj(std::move(_obj))
+        , counter(1) {}
+    };
+
+    thread_local std::deque<std::unique_ptr<detail::AbstrDfrObj>>
       deferred_objects;
 
   }
 
+  // ------------------------------------------------------------------------
+
   //
-  template<typename T>
-  class UniqueDefrd {
+  template<typename T> class UniqueDfr {
   private:
-    T* obj;
+    detail::UniqueDfrObj<T>* dfr_obj;
 
   public:
+    // default constructor
+    UniqueDfr()
+      : dfr_obj(nullptr) {}
+
+    // constructor from a deferred object created by DeferUnique()
+    UniqueDfr(detail::UniqueDfrObj<T>& _dfr_obj)
+      : dfr_obj(&_dfr_obj) {}
+
+    // move constructor
+    UniqueDfr(UniqueDfr&& _other) noexcept
+      : dfr_obj(std::exchange(_other.dfr_obj, nullptr)) {}
+    // move assignment
+    UniqueDfr& operator=(UniqueDfr&& _other) noexcept {
+      dfr_obj = std::exchange(_other.dfr_obj, nullptr);
+      return *this;
+    }
+
+    // copy constructor (deleted)
+    UniqueDfr(const UniqueDfr&) = delete;
+    // copy assignment (deleted)
+    UniqueDfr& operator=(const UniqueDfr&) = delete;
+
+    // destructor
+    ~UniqueDfr() {
+      if (dfr_obj)
+        dfr_obj->ready_for_collection = true;
+    }
+
+  public:
+    // resets, owns nothing afterwards
+    void Reset() { dfr_obj = nullptr; }
+
+    // true if owns, false otherwise
+    bool Owns() const { return dfr_obj; }
+    // explicit conversion to bool, true if owns, false otherwise
+    explicit operator bool() const { return Owns(); }
+
+    // returns a reference to owned T
+    // `assert(Owns());` inside
+    T& Deref() {
+      assert(Owns());
+      return dfr_obj->obj;
+    }
+    // returns a reference to owned T
+    // `assert(Owns());` inside
+    const T& Deref() const {
+      assert(Owns());
+      return dfr_obj->obj;
+    }
   };
 
   //
-  //   class SharedDefrd {};
+  template<typename T, typename... As> UniqueDfr<T> DeferUnique(As... args) {
+    auto uptr =
+      std::make_unique<detail::UniqueDfrObj<T>>(std::move(T(args...)));
+    auto& ref = *uptr;
+    return UniqueDfr(ref);
+  }
+
+  // ------------------------------------------------------------------------
 
   //
-  // template<typename T, typename... As>
-  // UniqueDefrd<T> Defer(As... args) {
-  //   // ?
-  // }
+  class CountedDfr {};
 
   //
-  //   SharedDefrd DeferShared() {}
+  // CountedDfr DeferCounted() {}
 
-  //
-  // returns: number of remaining deferred objects
-  size_t Collect() {
+  // ------------------------------------------------------------------------
+
+  // collects deferred objects that are ready for collection
+  void CollectDfrs() {
     auto& objs = detail::deferred_objects;
     auto cond = [](const auto& up) { return up->ready_for_collection; };
     objs.erase(std::remove_if(objs.begin(), objs.end(), cond), objs.end());
-    return objs.size();
   }
+
+  //
+  void FlushDfrs() { detail::deferred_objects.clear(); }
+
+  // ------------------------------------------------------------------------
 
 }
