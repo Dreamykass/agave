@@ -5,4 +5,4 @@ AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 BreakBeforeBraces: Custom
 SortIncludes: false
-...
+AlwaysBreakTemplateDeclarations: MultiLine

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12.0)
-project(agave_project VERSION 0.1.0)
+project(agave_project VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -7,8 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 add_executable(agave_tests
-      ${CMAKE_SOURCE_DIR}/main.cpp
+      ${CMAKE_SOURCE_DIR}/tests/main.cpp
+      ${CMAKE_SOURCE_DIR}/tests/box.cpp
+      ${CMAKE_SOURCE_DIR}/tests/defer1.cpp
       )
+target_include_directories(agave_tests PRIVATE ${CMAKE_SOURCE_DIR}/includes)
+
 
 
 find_package(doctest CONFIG REQUIRED)
