@@ -8,6 +8,15 @@
 namespace agave {
 
   // ------------------------------------------------------------------------
+
+  class F {
+  private:
+    // std::deque<std::unique_ptr<detail::AbstrDfrObj>> deferred_objects;
+
+  public:
+  };
+
+  // ------------------------------------------------------------------------
   namespace detail {
 
     class AbstrDfrObj {
@@ -70,14 +79,15 @@ namespace agave {
     UniqueDfr& operator=(const UniqueDfr&) = delete;
 
     // destructor
-    ~UniqueDfr() {
-      if (dfr_obj)
-        dfr_obj->ready_for_collection = true;
-    }
+    ~UniqueDfr() { Reset(); }
 
   public:
     // resets, owns nothing afterwards
-    void Reset() { dfr_obj = nullptr; }
+    void Reset() {
+      if (dfr_obj)
+        dfr_obj->ready_for_collection = true;
+      dfr_obj = nullptr;
+    }
 
     // true if owns, false otherwise
     bool Owns() const { return dfr_obj; }
@@ -103,6 +113,7 @@ namespace agave {
     auto uptr =
       std::make_unique<detail::UniqueDfrObj<T>>(std::move(T(args...)));
     auto& ref = *uptr;
+    detail::deferred_objects.emplace_back(std::move(uptr));
     return UniqueDfr(ref);
   }
 
