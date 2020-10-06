@@ -12,3 +12,7 @@ A collection of containers and utilities of mine.
 - [ ] `agave::FixedDequeMT<T>`
 - [ ] object pool?
 
+## Installation
+
+the cmake git-submodule thing?
+

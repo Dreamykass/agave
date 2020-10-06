@@ -50,6 +50,14 @@ namespace agave {
 
   // ------------------------------------------------------------------------
 
+  // lasts until the next collection or flush
+  template<typename T> class FleetingDfr {};
+
+  //
+  template<typename T, typename... As> UniqueDfr<T> DeferFleeting(As... args) {}
+
+  // ------------------------------------------------------------------------
+
   //
   template<typename T> class UniqueDfr {
   private:
@@ -138,5 +146,4 @@ namespace agave {
   void FlushDfrs() { detail::deferred_objects.clear(); }
 
   // ------------------------------------------------------------------------
-
 }
