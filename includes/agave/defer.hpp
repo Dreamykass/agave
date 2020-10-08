@@ -50,16 +50,68 @@ namespace agave {
 
   // ------------------------------------------------------------------------
 
+  // abstract interface for the Dfrs
+  template<typename T> class AbstractDfr {
+  private:
+  public:
+    // default constructor
+    // virtual AbstractDfr() = 0;
+
+    // constructor from a deferred object created by Defer_________()
+    // virtual AbstractDfr(detail::____________<T>& _dfr_obj)
+    // : dfr_obj(&_dfr_obj) {}
+
+    // move constructor
+    // virtual AbstractDfr(AbstractDfr&& _other) noexcept = 0;
+    // move assignment
+    // virtual AbstractDfr& operator=(AbstractDfr&& _other) noexcept = 0;
+
+    // copy constructor
+    // virtual AbstractDfr(const AbstractDfr&) = delete;
+    // copy assignment
+    // virtual AbstractDfr& operator=(const AbstractDfr&) = delete;
+
+    // destructor
+    virtual ~AbstractDfr() {}
+
+  public:
+    // resets, owns nothing afterwards
+    virtual void Reset() = 0;
+
+    // true if owns, false otherwise
+    virtual bool Owns() const = 0;
+    // explicit conversion to bool, true if owns, false otherwise
+    virtual explicit operator bool() const = 0;
+
+    // returns a reference to owned T
+    // `assert(Owns());` inside
+    virtual T& Deref() = 0;
+    // returns a reference to owned T
+    // `assert(Owns());` inside
+    virtual const T& Deref() const = 0;
+  };
+
+  // ------------------------------------------------------------------------
+
+  // lasts until the next flush
+  template<typename T> class PersistentDfr {};
+
+  template<typename T, typename... As>
+  PersistentDfr<T> DeferPersistent(As... args) {}
+
+  // ------------------------------------------------------------------------
+
   // lasts until the next collection or flush
   template<typename T> class FleetingDfr {};
 
   //
-  template<typename T, typename... As> UniqueDfr<T> DeferFleeting(As... args) {}
+  template<typename T, typename... As>
+  FleetingDfr<T> DeferFleeting(As... args) {}
 
   // ------------------------------------------------------------------------
 
   //
-  template<typename T> class UniqueDfr {
+  template<typename T> class UniqueDfr : public AbstractDfr<T> {
   private:
     detail::UniqueDfrObj<T>* dfr_obj;
 
