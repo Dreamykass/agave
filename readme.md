@@ -5,14 +5,10 @@ A collection of containers and utilities of mine.
 
 ## Contents
 
-- [ ] `agave::Defer()` - deferred destruction
-- [ ] `agave::FixedStack<T>`
-- [ ] `agave::FixedDeque<T>`
-- [ ] `agave::FixedStackMT<T>`
-- [ ] `agave::FixedDequeMT<T>`
+- [ ] `agave::state_machine::{Machine, State, StateQueue}`
+- [ ] `FixedStack<T>` ?
+- [ ] `FixedDeque<T>` ?
+- [ ] `Defer()` - deferred destruction?
 - [ ] object pool?
 
-## Installation
-
-the cmake git-submodule thing?
 
